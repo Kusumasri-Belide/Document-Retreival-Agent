@@ -1,0 +1,75 @@
+MODEL CONTEXT PROTOCOL
+What is Model Context Protocol?
+MCP is an open-source protocol that defines how AI applications can connect to external systems in a uniform way.
+Example:
+Consider it the "USB-C port for AI": MCP offers a universal connector for AI programs to connect to external data, tools, and workflows, much like USB-C offers a common plug for devices (laptops, chargers, and headphones).
+Why MCP?
+Every AI integration is custom-built in the absence of MCP. For instance:
+One integration would be required in order to access a database.
+Another is to retrieve data.
+Another to run a calculator.
+MCP eliminates the requirement for one-time integrations by allowing AI applications to communicate with any MCP-compliant system by simply understanding the MCP standard.
+What MCP Connects To?
+Data sources: local files, knowledge bases, SQL/NoSQL databases, and APIs.
+Tools: Web browsers, code interpreters, calculators, and search engines.
+Workflows: Ticketing systems, corporate procedures, and customized fast pipelines.
+MCP: End-to-End Workflow
+ServiceNow MCP:
+Model Context Protocol (MCP) is an open, standardized communication layer that connects AI models with external tools and services. It enables seamless, tool-augmented reasoning by allowing AI Agents to dynamically discover and invoke tools based on the user's query.
+In ServiceNow, MCP does not imply a proprietary “hosted server” owned by ServiceNow. Instead, ServiceNow provides the client-side implementation (MCP Client) inside AI Agent Studio, which can connect to any MCP-compliant external MCP Server
+MCP Client (Provided by ServiceNow)
+Exists within AI Agent Studio.
+Registers a custom MCP Server using:
+OAuth 2.1, API Key, or manual credentials.
+Allows AI agents to:
+Discover tools.
+Send execution requests.
+Fetch metadata about tools.
+Building a Custom MCP Server 
+1. Select a Web Framework
+Begin by choosing a backend framework suitable for building REST APIs. You can use frameworks like:
+FastAPI or Flask in Python
+Express in Node.js
+Spring Boot in Java
+Gin in Go
+The framework will help you define endpoints, handle requests/responses, and manage tool logic cleanly.
+2. Design a Tool Registry Endpoint
+This is the primary endpoint that returns a list of tools your MCP server supports. The registry provides:
+Tool names
+Descriptions
+Required input parameters
+Output format
+This allows any MCP client (like ServiceNow or Claude) to discover what tools are available.
+3. Define Tool Execution Endpoints
+For each tool listed in your registry, create a unique endpoint that can:
+Accept structured input (usually JSON with parameters)
+Run the tool’s logic or connect to an external service
+Return the result in a predefined format
+Each execution endpoint should follow a consistent naming pattern and structure, making it easy for AI clients to call them.
+4. Structure Input and Output Contracts
+To be compliant with MCP protocols:
+Inputs should be accepted as JSON objects under a common key (like parameters)
+Outputs must be returned as JSON with a standard field (e.g., result or output)
+Following a consistent schema ensures the MCP client can parse responses and take appropriate action.
+5. Host the MCP Server Publicly
+Your MCP Server must be accessible to any external system or agent, so you must:
+Host it using a cloud provider like AWS, Azure, Render, Heroku, or GCP
+Ensure it's exposed over HTTPS
+Obtain a stable URL (e.g., https://yourmcpserver.com) for configuration in platforms like ServiceNow
+6. Implement Authentication (Optional but Recommended)
+To secure access to your tools:
+Use API key headers for simple authentication
+Use OAuth 2.1 for enterprise integrations (required by platforms like ServiceNow)
+Implement rate limiting, access logging, and validation checks for production environments
+7. Maintain Tool Metadata
+Your MCP server should allow the tools to be easily updated, added, or disabled. Maintain tool metadata in:
+A static config file
+A database
+An in-memory structure
+This helps in managing dynamic tool availability without server restarts.
+8. Test and Document Your Tools
+Ensure each tool endpoint:
+Handles errors gracefully
+Validates input schema
+Provides meaningful output messages
+Prepare a Swagger/OpenAPI spec or basic API documentation to make it easier for consumers (like ServiceNow MCP Client) to integrate and troubleshoot.

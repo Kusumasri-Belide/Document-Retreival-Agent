@@ -1,0 +1,66 @@
+PYTHON TOOLKIT : TICKET CLUSTERING ANALYSIS 
+DESIGN DOCUMENT
+1. Introduction & Objectives
+This system automates the generation of detailed ticket summaries and categorizes tickets into meaningful clusters. It addresses the challenge of unstructured, inconsistent, and noisy ticket descriptions by providing:
+Generated Summary (~200 words) derived exclusively from Short Description , Description, Additional Comments and Work Notes.
+Ticket Cluster assignment into predefined categories or new clusters if required.
+Structured outputs in Excel/CSV for downstream reporting and integration with ticketing tools.
+Objective: Improve ticket triage, routing efficiency, and analytics by enabling automated summarization and clustering.
+2. Data Understanding
+The system works with ticket data containing columns such as:
+Number – Ticket identifier
+Account – Customer/tenant raising the ticket
+Short Description – Concise one-line problem statement
+Category – Initial user-provided category
+Priority – Criticality/urgency
+Description – Detailed issue explanation
+Assigned To, Additional Comments, Work Notes, Resolution Notes – Contextual/auxiliary fields
+Important: Only Short Description, Description, Additional Comments and Work Notes are used for generating summaries and clustering.
+3. Preprocessing Logic
+Data loading: Input CSV/Excel is read, ensuring correct schema.
+Cleaning: Handles whitespace, newline normalization, special characters, and duplicates.
+Filtering: Retains only Short Description and Description for NLP processing.
+Missing handling: If Description is absent, fallback to Short Description only.
+Metadata creation: Tracks ticket lengths, presence of fields, and preprocessing outcomes.
+This ensures high-quality, normalized inputs before passing to NLP models.
+4. NLP Approach
+The system employs LLM-based summarization and vectorization:
+Summarization:
+Uses an LLM to combine Short Description and Description into a coherent, structured summary (~200 words).
+Style is professional and concise, avoiding fabricated details.
+Summaries maintain factual integrity and represent the original issue clearly.
+Vectorization (in vectorize.py):
+Converts text into embeddings (dense vector representations).
+Enables semantic similarity comparisons and clustering.
+Provides foundation for grouping related tickets.
+5. Clustering Approach
+Rule-based classification:
+Predefined clusters like ServiceNow login issues, Performance issues, etc.
+Keyword and phrase matching for high-confidence assignments.
+Semantic clustering:
+Embeddings from vectorize.py are clustered using algorithms like K-Means or HDBSCAN.
+Similar tickets are grouped even if worded differently.
+Cluster naming:
+Extracts key terms or uses LLMs to propose meaningful cluster labels.
+Matches new clusters against predefined categories; otherwise, proposes new categories.
+6. Tech Stack
+Language: Python
+Data Handling: pandas, numpy
+Summarization: LLM APIs (e.g., OpenAI, HuggingFace models)
+Embeddings: sentence-transformers or managed embedding APIs
+Clustering: scikit-learn (KMeans), HDBSCAN for semantic grouping
+Configuration: YAML-based config management
+Outputs: Excel/CSV via pandas I/O functions
+8. Evaluation & Output
+Evaluation
+Summarization:
+Human validation for fluency, factual correctness, and completeness.
+Automatic checks for summary length and entity overlap with source.
+Clustering:
+Internal metrics: silhouette score, cluster cohesion.
+Business metrics: accuracy of routing, reduction in manual reassignments.
+Output
+Final Excel/CSV contains all original columns plus:
+Generated Summary
+Ticket Cluster
+Optional metadata like confidence score and assignment method

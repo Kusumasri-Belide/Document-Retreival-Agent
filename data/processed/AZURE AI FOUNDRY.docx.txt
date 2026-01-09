@@ -1,0 +1,22 @@
+AZURE AI FOUNDRY
+Models Provided by AI Foundry:
+Model Name Description GPT-5 series NEW gpt-5, gpt-5-mini, gpt-5-nano, gpt-5-chat gpt-oss NEW open-weight reasoning models codex-mini Fine-tuned version of o4-mini. GPT-4.1 series gpt-4.1, gpt-4.1-mini, gpt-4.1-nano model-router A model that intelligently selects from a set of underlying chat models to respond to a given prompt. computer-use-preview An experimental model trained for use with the Responses API computer use tool. o-series models Reasoning models with advanced problem solving and increased focus and capability. GPT-4o, GPT-4o mini, and GPT-4 Turbo Capable Azure OpenAI models with multimodal versions, which can accept both text and images as input. GPT-4 A set of models that improve on GPT-3.5 and can understand and generate natural language and code. GPT-3.5 A set of models that improve on GPT-3 and can understand and generate natural language and code. Embeddings A set of models that can convert text into numerical vector form to facilitate text similarity. Image generation A series of models that can generate original images from natural language. Video generation A model that can generate original video scenes from text instructions. Audio A series of models for speech to text, translation, and text to speech. GPT-4o audio models support either low latency speech in, speech out conversational interactions or audio generation.
+AI Foundry Step-By-Step Process:
+Create a Foundry account and project in Azure AI Foundry portal 
+Go to Azure AI Foundry. If you are in a project, select Azure AI Foundry at the top left of the page to go to the Home page.
+Use the Agent getting started creation flow for the fastest experience. Click Create an agent.
+Enter a name for the project. If you want to customize the default values, select Advanced options.
+Select Create.
+Wait for your resources to be provisioned.
+An account and project (child resource of your account) will be created.
+The gpt-4o model will automatically be deployed
+A default agent will be created
+Once complete, you will land directly in the agent playground and you can start creating agents. You can give your agent instructions on what to do and how to do it. For example: "You are a helpful agent that can answer questions about geography." Then you can start chatting with your agent.
+Set up your agent environment
+Azure AI Foundry Agent Service offers three environment configuration modes to suit different needs:
+Basic Setup:
+This setup is compatible with OpenAI Assistants and manages agent states using the platform's built-in storage. It includes the same tools and capabilities as the Assistants API, with added support for non-OpenAI models and tools such as Azure AI Search, and Bing.
+Standard Setup:
+Includes everything in the basic setup and fine-grained control over your data by allowing you to use your own Azure resources. All customer data—including files, threads, and vector stores—are stored in your own Azure resources, giving you full ownership and control.
+Standard Setup with Bring Your Own (BYO) Virtual Network:
+Includes everything in the Standard Setup, with the added ability to operate entirely within your own virtual network. This setup supports Bring Your Own Virtual Network (BYO virtual network), allowing for strict control over data movement and helping prevent data exfiltration by keeping traffic confined to your network environment.

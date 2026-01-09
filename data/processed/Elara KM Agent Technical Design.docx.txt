@@ -1,0 +1,30 @@
+Elara – Knowledge Management Agent
+Overview
+The Elara - Knowledge Management Agentic solution includes a team of AI agents acting as Knowledge Managers, handling KB creation, consolidation, refinement, and validation.
+Functional Design
+Elara – Agent Team
+Agent​ Description​ Elara - Check Article Existence Agent​ Agent checks for existing KB articles related to the ticket.​ Elara - Article Generation​ Creates articles in specific Knowledge Bases​ Elara - KB Article Refinement​ Refines KB articles from Agent Elara – Article Generation for quality, accuracy & audience value​. Elara - Article Deduplication​ AI Agent detects duplicate KB articles; skips retired or outdated content​
+Technical Design
+Technical Components Created
+Name Description Agentic Workflow Elara Knowledge Management Agent This workflow automates the creation and refinement of knowledge base articles. Trigger Elara - Scheduled Job The trigger happens via script through schedule job. It will search for today’s closed incident and make KB articles from them. AI Agents Elara Check Article Existence Agent This agent will check if a similar KB article exists for the provided case details. Elara Article Generation Agent The Knowledge Creator Agent specializes in retrieving writable Knowledge Bases and generating Knowledge Articles in the specified Knowledge base. Elara KB Article Refinement This agent is designed to refine and optimize KB articles created by 'Agent Elara'. It ensures that the articles meet quality standards, are free of errors, and provide value to the intended audience. Elara Article Deduplication Knowledge Management's AI Agent for detecting duplicating articles. Retired or outdated articles won't be surfaced. Custom Skills NR Refined KB Article Used in "Elara KB Article Refinement" - this skill is designed to refine the KB article by enriching the content, removing any PII adding content from the master document site, and adding reference links. This skill is part of NR Now Assist Skill Kit application. Script Include Library KMAIAgentUtilExtend This script library includes helper functions related to KB generation and refinement. NRAgenticCoreUtils A script library for core utility functions. This library is part of NR Now Assist Skill Kit application.
+Configuration Instructions
+Following are the exact steps required to successfully use this application.
+Pre-requisites 
+User & Roles
+Create a user account in ServiceNow such as “agent.elara” and assign following roles
+itil
+knowledge_admin
+now_assist_panel_user
+Basic Configuration
+Navigate to Elara – Knowledge Management AI Agent > Basic Configurations from Navigation panel.
+Add the earlier created agent user account sysid in the Elara AI Agent user record SYSID property.
+Add the master document site link in the The Master Document Site link property i.e. - https://docs.servicenow.com/
+Set the sysid of the Knowledge Base in which you want to create the Elara generated KB articles against the default incident table name in JSON format, i.e. {“incident”: “<KB SYSID>”}
+To change the daily Schedule Job (Elara - Scheduled Job) query, set the Set the Daily Run Query for Auto KB Generation on the "Task" table property accordingly. Note - the query should be on Task table not on case/incident table. By default, the following query is set, i.e. to create KB for today’s closed incident/case.
+Activate Schedule Job, by default the daily run schedule job is deactivated.
+To activate it, navigate to Elara – Knowledge Management AI Agent > Elara – Scheduled Job
+Open the schedule job (Elara - Scheduled Job) and click on Active checkbox and save the record. By default, it will search for today’s closed cases/incident and make KB articles from them.
+Migration of Agent:
+Download the update set of Elara Knowledge Management Agent application (link)
+Download the update set of NR Now Assist Skill kit application (link)
+To migrate the Elara Knowledge Management Agent to another instance, retrieve the above two update sets.

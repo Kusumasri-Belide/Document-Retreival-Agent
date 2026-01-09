@@ -1,0 +1,22 @@
+Phoebe IT Helpdesk Agent
+Overview
+The Phoebe IT Helpdesk Agentic solution is designed to resolve tasks by fetching record details, generating resolution summary steps, and updating comments or task work notes accordingly.
+Functional Design
+Phoebe – Agent Team
+Agent​ Description​ Phoebe Next Best Action Recommender Agent​ The Next best action recommender identifies the optimal steps for resolving tasks by reviewing knowledge articles. Phoebe Comment Response Agent​ This agent is designed to summarize end-user feedback on task records after a resolution plan is given.​
+Technical Design
+Technical Components Created
+Name Description Agentic Workflow Phoebe IT Helpdesk Workflow This workflow is designed to resolve tasks by generating resolution summary steps. Trigger Trigger 1 - Phoebe Incident Trigger Whenever incident record is created. Trigger 2 - Trigger Phoebe AI Agent Whenever comment is provided by the user on the incident record. Trigger happens via script through BR. AI Agents Phoebe Next Best Action Recommender Agent This agent is responsible for fetching record details, and searching relevant knowledge articles to provide resolution steps as needed. Phoebe Comment Response Agent This agent is designed to summarize end user feedback on task records after a resolution plan is given. It helps streamline the process by closing resolved cases or escalating unresolved ones to the appropriate group members. Custom Skills NR Sentiment Analysis Used in Phoebe Comment Response Agent - this skill will identify the end user’s sentiment regarding whether the resolution steps worked or not. NR Refine Resolution Plan Used in Phoebe Next Best Action Recommender Agent - this skill is used to generate a clear, concise, and user-friendly resolution plan based on the provided context. NR Incident Summarization Used in Phoebe Next Best Action Recommender Agent - this skill is useful to summarize the incident using short description and description Script Include Library NRAgenticCoreUtils A script library for core utility functions. This library is part of NR Now Assist Skill Kit application.
+Configuration Instructions
+Following are the exact steps required to successfully use this application.
+Pre-requisites 
+User & Roles
+Create a user account in ServiceNow such as “agent.phoebe” and assign following roles
+itil
+now_assist_panel_user
+Basic Configuration
+Navigate to Phoebe IT Helpdesk Agent> Basic Configurations from Navigation panel for setting basic configuration before running Phoebe.
+Migration of Agent
+Download the update set of Phoebe IT Helpdesk Agent (link)
+Download the update set NR Now Assist Skill Kit (link)
+To migrate the Phoebe IT Helpdesk Agent, retrieve these two update set in that instance.
