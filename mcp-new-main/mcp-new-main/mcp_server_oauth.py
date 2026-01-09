@@ -27,7 +27,132 @@ authorization_codes: Dict[str, dict] = {}
 # --- MCP Server with FastMCP ---
 mcp = FastMCP("OAuth MCP Server")
 
-# Easy tool definitions (you can add more tools here easily!)
+# Import document agent modules
+import sys
+import os
+sys.path.append('/home/ubuntu/mcp-new')  # Add your main app path
+
+try:
+    from backend.llm_answer import generate_answer
+    from backend.retriever import reload_index, retrieve_relevant_chunks
+    from backend.config import PROCESSED_DIR, VECTOR_STORE_DIR
+    from backend.extract_answers import extract_all
+    from backend.embed import embed_and_store
+    import pickle
+    import faiss
+    from pathlib import Path
+    DOCUMENT_AGENT_AVAILABLE = True
+    print("✅ Document agent modules loaded successfully")
+except ImportError as e:
+    DOCUMENT_AGENT_AVAILABLE = False
+    print(f"⚠️ Document agent not available: {e}")
+
+# Document Agent Tools
+@mcp.tool(title="Ask document question")
+def ask_document(question: str) -> str:
+    """Answer a question using the SharePoint document index and Azure OpenAI."""
+    if not DOCUMENT_AGENT_AVAILABLE:
+        return "Document agent not available. Please check configuration."
+    try:
+        return generate_answer(question)
+    except FileNotFoundError:
+        return "Vector store not found. Please run reindex_documents first."
+    except Exception as e:
+        return f"Error answering question: {str(e)}"
+
+@mcp.tool(title="List available documents")
+def list_documents() -> str:
+    """List all processed documents available for querying."""
+    if not DOCUMENT_AGENT_AVAILABLE:
+        return "Document agent not available."
+    try:
+        docs = sorted([f for f in os.listdir(PROCESSED_DIR) if f.endswith(".txt")])
+        if not docs:
+            return "No documents found. Please run reindex_documents to process documents."
+        return f"Available documents ({len(docs)}):\n" + "\n".join(f"- {doc}" for doc in docs)
+    except Exception as e:
+        return f"Error listing documents: {str(e)}"
+
+@mcp.tool(title="Reindex documents")
+def reindex_documents() -> str:
+    """Re-extract texts from documents and rebuild the FAISS vector index."""
+    if not DOCUMENT_AGENT_AVAILABLE:
+        return "Document agent not available."
+    try:
+        # Extract documents
+        extract_all()
+        # Build embeddings and FAISS index
+        embed_and_store()
+        # Reload in-memory index
+        reload_index()
+        return "✅ Document reindexing completed successfully. Vector store rebuilt."
+    except Exception as e:
+        return f"Error during reindexing: {str(e)}"
+
+@mcp.tool(title="Get document content")
+def get_document_content(document_name: str) -> str:
+    """Get the full content of a specific processed document by name."""
+    if not DOCUMENT_AGENT_AVAILABLE:
+        return "Document agent not available."
+    try:
+        doc_path = Path(PROCESSED_DIR) / document_name
+        if not doc_path.exists():
+            available_docs = [f for f in os.listdir(PROCESSED_DIR) if f.endswith(".txt")]
+            return f"Document '{document_name}' not found. Available documents: {', '.join(available_docs)}"
+        
+        content = doc_path.read_text(encoding="utf-8", errors="ignore")
+        # Truncate if too long for display
+        if len(content) > 2000:
+            content = content[:2000] + f"\n\n... (truncated, full document has {len(content)} characters)"
+        return content
+    except Exception as e:
+        return f"Error reading document: {str(e)}"
+
+@mcp.tool(title="Get vector store statistics")
+def get_vector_stats() -> str:
+    """Get statistics about the current vector store and document index."""
+    if not DOCUMENT_AGENT_AVAILABLE:
+        return "Document agent not available."
+    try:
+        idx_path = Path(VECTOR_STORE_DIR) / "faiss_index.bin"
+        ch_path = Path(VECTOR_STORE_DIR) / "chunks.pkl"
+        
+        if not idx_path.exists() or not ch_path.exists():
+            return "Vector store not found. Run reindex_documents to build the index."
+        
+        # Load index and chunks
+        index = faiss.read_index(str(idx_path))
+        with open(ch_path, "rb") as f:
+            chunks = pickle.load(f)
+        
+        # Get document count
+        doc_count = len([f for f in os.listdir(PROCESSED_DIR) if f.endswith(".txt")])
+        
+        return f"""📊 Vector Store Statistics:
+- Documents processed: {doc_count}
+- Text chunks: {len(chunks)}
+- Vector dimensions: {index.d}
+- Index type: {type(index).__name__}
+- Index size: {index.ntotal} vectors"""
+    except Exception as e:
+        return f"Error getting vector stats: {str(e)}"
+
+@mcp.tool(title="Search document chunks")
+def search_chunks(query: str, num_results: int = 4) -> str:
+    """Search for relevant document chunks without generating an AI answer."""
+    if not DOCUMENT_AGENT_AVAILABLE:
+        return "Document agent not available."
+    try:
+        chunks = retrieve_relevant_chunks(query, k=num_results)
+        if not chunks:
+            return "No relevant chunks found for your query."
+        return f"📄 Found {num_results} relevant chunks:\n\n{chunks}"
+    except FileNotFoundError:
+        return "Vector store not found. Please run reindex_documents first."
+    except Exception as e:
+        return f"Error searching chunks: {str(e)}"
+
+# Basic utility tools (keeping original ones)
 @mcp.tool(title="Get current date and time")
 def now() -> str:
     """Return the current date/time in ISO 8601 with UTC offset."""
@@ -37,12 +162,6 @@ def now() -> str:
 def add(a: int, b: int) -> int:
     """Sum two integers and return the result."""
     return a + b
-
-# TODO: Add more tools here in the future like this:
-# @mcp.tool(title="Your new tool")
-# def your_new_tool(param1: str, param2: int) -> str:
-#     """Description of your new tool."""
-#     return f"Result: {param1} + {param2}"
 
 # --- ServiceNow Compatibility Wrapper ---
 async def servicenow_mcp_handler(request: Request):
@@ -98,6 +217,70 @@ async def servicenow_mcp_handler(request: Request):
                         "required": ["a", "b"],
                         "additionalProperties": False
                     }
+                },
+                {
+                    "name": "ask_document",
+                    "description": "Answer questions using the SharePoint document index and Azure OpenAI",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "question": {"type": "string", "description": "Question to ask about the documents"}
+                        },
+                        "required": ["question"],
+                        "additionalProperties": False
+                    }
+                },
+                {
+                    "name": "list_documents",
+                    "description": "List all processed documents available for querying",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {},
+                        "additionalProperties": False
+                    }
+                },
+                {
+                    "name": "reindex_documents",
+                    "description": "Re-extract texts from documents and rebuild the FAISS vector index",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {},
+                        "additionalProperties": False
+                    }
+                },
+                {
+                    "name": "get_document_content",
+                    "description": "Get the full content of a specific processed document by name",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "document_name": {"type": "string", "description": "Name of the document to retrieve"}
+                        },
+                        "required": ["document_name"],
+                        "additionalProperties": False
+                    }
+                },
+                {
+                    "name": "get_vector_stats",
+                    "description": "Get statistics about the current vector store and document index",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {},
+                        "additionalProperties": False
+                    }
+                },
+                {
+                    "name": "search_chunks",
+                    "description": "Search for relevant document chunks without generating an AI answer",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "query": {"type": "string", "description": "Search query"},
+                            "num_results": {"type": "integer", "description": "Number of results to return", "default": 4}
+                        },
+                        "required": ["query"],
+                        "additionalProperties": False
+                    }
                 }
             ]
             
@@ -118,9 +301,24 @@ async def servicenow_mcp_handler(request: Request):
             
             try:
                 if tool_name == "now":
-                    result = now()  # Call the FastMCP function
+                    result = now()
                 elif tool_name == "add":
-                    result = add(arguments.get("a", 0), arguments.get("b", 0))  # Call FastMCP function
+                    result = add(arguments.get("a", 0), arguments.get("b", 0))
+                elif tool_name == "ask_document":
+                    result = ask_document(arguments.get("question", ""))
+                elif tool_name == "list_documents":
+                    result = list_documents()
+                elif tool_name == "reindex_documents":
+                    result = reindex_documents()
+                elif tool_name == "get_document_content":
+                    result = get_document_content(arguments.get("document_name", ""))
+                elif tool_name == "get_vector_stats":
+                    result = get_vector_stats()
+                elif tool_name == "search_chunks":
+                    result = search_chunks(
+                        arguments.get("query", ""),
+                        arguments.get("num_results", 4)
+                    )
                 else:
                     return JSONResponse({
                         "jsonrpc": "2.0",
@@ -136,7 +334,7 @@ async def servicenow_mcp_handler(request: Request):
                         "isError": False
                     }
                 }
-                print(f"✅ Tool result sent to ServiceNow: {result}")
+                print(f"✅ Tool result sent to ServiceNow: {result[:100]}...")  # Truncate long results in log
                 return JSONResponse(response)
                 
             except Exception as tool_error:
