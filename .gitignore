@@ -1,6 +1,95 @@
+# Python virtual environments
 venv/
 env/
 ENV/
 .venv/
 .ENV/
 venv.bak/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+*.env
+
+# Credentials and tokens
+credentials.json
+token.json
+.oauth_credentials
+client_secret*.json
+
+# API keys and secrets
+*_key.txt
+*_secret.txt
+*_token.txt
+
+# AWS credentials
+.aws/
+aws-credentials.txt
+
+# Azure credentials
+azure-credentials.json
+
+# Microsoft Graph tokens
+graph_token.json
+
+# Cache and temporary files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+log/
+
+# Data directories (may contain sensitive documents)
+data/docs/
+data/processed/
+data/vector_store/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Temporary files
+tmp/
+temp/
+.tmp/
